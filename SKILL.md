@@ -1,6 +1,48 @@
 ---
 name: claude-code-anatomy
 description: 基于"4要素框架"快速搭建 Claude Code 项目结构。提供 CLAUDE.md 模板、Skills 设计规范、Hooks 配置和渐进式文档组织方式。
+
+input_schema:
+  project_name:
+    type: string
+    required: true
+    description: 项目名称
+  project_type:
+    type: string
+    required: false
+    default: "general"
+    enum: ["general", "web", "api", "mobile", "cli"]
+    description: 项目类型
+  include_hooks:
+    type: boolean
+    required: false
+    default: true
+    description: 是否包含 hooks 配置
+
+output_schema:
+  files:
+    type: array
+    description: 生成的文件列表
+    items:
+      type: object
+      properties:
+        path: { type: string }
+        content: { type: string }
+  checklist:
+    type: array
+    description: 配置完成后的检查清单
+    items: { type: string }
+
+verification:
+  - check: "CLAUDE.md in output.files"
+    severity: error
+  - check: ".claude/skills/ folder in output.files"
+    severity: error
+  - check: "len(CLAUDE.md content) <= 3000 tokens"
+    severity: warning
+  - check: "CLAUDE.md contains '## Purpose' and '## Repo Map'"
+    severity: error
+
 ---
 
 # Claude Code 项目骨架
