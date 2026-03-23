@@ -1,20 +1,21 @@
 ---
 name: claude-code-anatomy
-description: 基于"4要素框架"快速搭建 Claude Code 项目结构。
+description: 基于"4要素框架"快速搭建 Claude Code 项目结构，支持 Claude Cowork Projects 配置。
 
 **触发场景：**
 - 初始化新的 Claude Code 项目
+- 配置 Claude Cowork Projects
 - 重构现有项目以适配 AI 协作
 - 团队需要统一的项目结构规范
 - 学习 Claude Code 最佳实践
 
-**关键词：** Claude Code、项目结构、CLAUDE.md、skills、hooks、4要素、项目初始化
+**关键词：** Claude Code、项目结构、CLAUDE.md、skills、hooks、4要素、项目初始化、Claude Cowork、Projects
 
 triggers:
   - type: keyword
-    patterns: ["初始化 Claude Code", "项目结构", "CLAUDE.md", "claude setup", "项目骨架"]
+    patterns: ["初始化 Claude Code", "项目结构", "CLAUDE.md", "claude setup", "项目骨架", "Claude Cowork", "Projects"]
   - type: intent
-    patterns: ["搭建 Claude Code 项目", "创建项目结构", "初始化项目", "配置 Claude Code"]
+    patterns: ["搭建 Claude Code 项目", "创建项目结构", "初始化项目", "配置 Claude Code", "设置 Projects"]
   - type: context
     condition: "project_init == true or first_time_setup == true"
 
@@ -29,6 +30,11 @@ input_schema:
     default: "general"
     enum: ["general", "web", "api", "mobile", "cli"]
     description: 项目类型
+  include_cowork:
+    type: boolean
+    required: false
+    default: false
+    description: 是否配置 Claude Cowork Projects ⭐ 新增
   include_hooks:
     type: boolean
     required: false
@@ -49,6 +55,12 @@ output_schema:
       properties:
         path: { type: string }
         content: { type: string }
+  cowork_config:
+    type: object
+    description: Claude Cowork Projects 配置 ⭐ 新增
+    properties:
+      project_id: { type: string }
+      remote_access: { type: boolean }
   checklist:
     type: array
     description: 配置完成后的检查清单
@@ -62,6 +74,8 @@ verification:
   - check: "CLAUDE.md in output.files"
     severity: error
   - check: ".claude/skills/ folder in output.files or not input.include_skills"
+    severity: error
+  - check: "if input.include_cowork then output.cowork_config is not null"
     severity: error
   - check: "len(CLAUDE.md content) <= 3000 tokens"
     severity: warning
@@ -112,6 +126,54 @@ verification:
 - ❌ Skills 描述过于宽泛（如 "help with backend"）
 - ❌ Hooks 过度触发（需限定文件类型和范围）
 - ❌ 所有信息塞给 Claude（应渐进式披露，按需加载）
+
+## Claude Cowork Projects 配置 🔥 **新增**
+
+Claude Cowork Projects 提供项目级协作能力，支持远程访问和团队协作。
+
+### 配置步骤
+
+1. **初始化 Project**
+   ```bash
+   # 在 Claude Code 中
+   /project init
+   ```
+
+2. **配置远程访问**（可选）
+   ```json
+   {
+     "remote_access": {
+       "enabled": true,
+       "allowed_users": ["team@company.com"],
+       "permissions": ["read", "write"]
+     }
+   }
+   ```
+
+3. **同步 Skills**
+   ```bash
+   # Skills 现在与 Project 关联
+   /skill add doc2skill
+   /skill sync
+   ```
+
+### Project 结构升级
+
+```
+项目/
+├── .claude/
+│   ├── project.json      # Project 配置 ⭐ 新增
+│   ├── skills/           # 项目级 Skills
+│   └── hooks/            # 项目级 Hooks
+├── CLAUDE.md
+└── ...
+```
+
+### 与 4要素框架的关系
+
+- **Projects** 是 **CLAUDE.md** 的扩展，提供团队协作上下文
+- **Skills** 现在可以绑定到 Project，共享给团队成员
+- **Hooks** 在 Project 级别统一管理
 
 ## 核心原则
 
