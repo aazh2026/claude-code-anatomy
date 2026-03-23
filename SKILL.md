@@ -1,6 +1,22 @@
 ---
 name: claude-code-anatomy
-description: 基于"4要素框架"快速搭建 Claude Code 项目结构。提供 CLAUDE.md 模板、Skills 设计规范、Hooks 配置和渐进式文档组织方式。
+description: 基于"4要素框架"快速搭建 Claude Code 项目结构。
+
+**触发场景：**
+- 初始化新的 Claude Code 项目
+- 重构现有项目以适配 AI 协作
+- 团队需要统一的项目结构规范
+- 学习 Claude Code 最佳实践
+
+**关键词：** Claude Code、项目结构、CLAUDE.md、skills、hooks、4要素、项目初始化
+
+triggers:
+  - type: keyword
+    patterns: ["初始化 Claude Code", "项目结构", "CLAUDE.md", "claude setup", "项目骨架"]
+  - type: intent
+    patterns: ["搭建 Claude Code 项目", "创建项目结构", "初始化项目", "配置 Claude Code"]
+  - type: context
+    condition: "project_init == true or first_time_setup == true"
 
 input_schema:
   project_name:
@@ -18,6 +34,11 @@ input_schema:
     required: false
     default: true
     description: 是否包含 hooks 配置
+  include_skills:
+    type: boolean
+    required: false
+    default: true
+    description: 是否包含 skills 目录
 
 output_schema:
   files:
@@ -32,15 +53,21 @@ output_schema:
     type: array
     description: 配置完成后的检查清单
     items: { type: string }
+  next_steps:
+    type: array
+    description: 后续建议操作
+    items: { type: string }
 
 verification:
   - check: "CLAUDE.md in output.files"
     severity: error
-  - check: ".claude/skills/ folder in output.files"
+  - check: ".claude/skills/ folder in output.files or not input.include_skills"
     severity: error
   - check: "len(CLAUDE.md content) <= 3000 tokens"
     severity: warning
   - check: "CLAUDE.md contains '## Purpose' and '## Repo Map'"
+    severity: error
+  - check: "all file in output.files has file.path and file.content"
     severity: error
 
 ---
@@ -48,6 +75,43 @@ verification:
 # Claude Code 项目骨架
 
 基于 Vaidehi 的「4要素框架」，快速搭建适合 AI 协作的项目结构。
+
+## Capabilities
+
+- 生成标准化的 CLAUDE.md 项目契约
+- 创建 .claude/skills/ 可复用专家模式目录
+- 配置 .claude/hooks/ 自动护栏
+- 建立 docs/ 渐进式文档结构
+- 提供局部 CLAUDE.md 模板（复杂模块）
+
+## Constraints
+
+- 适用于**新项目初始化**或**轻度重构**
+- 已有复杂项目可能需要渐进式迁移，而非一次性重构
+- 大型项目（>50人团队）可能需要扩展结构
+- 生成的是**起点模板**，需根据实际业务调整
+
+## When to Use
+
+- ✅ 启动新项目，需要快速搭建 Claude Code 友好的结构
+- ✅ 团队需要统一的项目规范和协作方式
+- ✅ 学习 Claude Code 最佳实践和项目组织方式
+- ✅ 现有项目过于混乱，需要重新梳理
+
+## When NOT to Use
+
+- ❌ 在已有复杂项目中强行套用所有结构（建议渐进式采用）
+- ❌ 忽略团队已有规范（需协调统一）
+- ❌ 过度设计小项目（简单项目可简化结构）
+- ❌ 期望一劳永逸（项目结构需随项目演进迭代）
+
+## Anti-patterns
+
+- ❌ 生成结构后永不更新（项目结构应随项目演进）
+- ❌ CLAUDE.md 写得过长（应 <200 行，保持简洁）
+- ❌ Skills 描述过于宽泛（如 "help with backend"）
+- ❌ Hooks 过度触发（需限定文件类型和范围）
+- ❌ 所有信息塞给 Claude（应渐进式披露，按需加载）
 
 ## 核心原则
 
